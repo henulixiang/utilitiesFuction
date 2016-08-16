@@ -61,7 +61,7 @@
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>E:\DevelopEnvironment\LinuxHeadFile\usr\include;E:\DevelopEnvironment\LinuxHeadFile\usr\lib\gcc\x86_64-linux-gnu\4.6\include;E:\DevelopEnvironment\LinuxHeadFile\usr\local\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemGroup>
     <ClCompile Include="src\Utilities.cc" />

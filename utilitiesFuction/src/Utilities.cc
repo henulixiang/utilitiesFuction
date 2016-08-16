@@ -1,24 +1,58 @@
 #include "../include/Utilities.h"
-#include <algorithm>
 #include <time.h>
 #include <cstring>
-#include <string>
 #include <errno.h>
+#include <iostream>
+#include <string>
+#include <algorithm>
 
-#define G_MAX_CONVERT_LEN 102400
+//编码转换时，字符串的最大长度
+const int kMaxConvertLen = 102400;
 
 
-int Utilities::GBK2UTF(std::string & strSrc, std::string & strDst, std::string & strRes)
+std::string Utilities::CurrentTimeString()
+{
+	return CurrentTimeString("%Y-%m-%d.%X");
+}
+
+std::string Utilities::CurrentTimeString(const char * time_formate)
+{
+	time_t now = time(0);
+	struct tm * now_struct = localtime(&now);
+	char buf[128];
+	strftime(buf, sizeof(buf), time_formate, now_struct);
+	return buf;
+}
+
+void Utilities::LogInfo(const std::string & message)
+{
+	std::string now = CurrentTimeString();
+	std::cout << now << "\tINFO:" << message << std::endl;
+}
+
+void Utilities::LogWarning(const std::string & message)
+{
+	std::string now = CurrentTimeString();
+	std::cout << now << "\tWARNING:" << message << std::endl;
+}
+
+void Utilities::LogError(const std::string & message)
+{
+	std::string now = CurrentTimeString();
+	std::cout << now << "\tERROR:" << message << std::endl;
+}
+
+int Utilities::GbkToUtf8(std::string & input, std::string & output, std::string & convert_result)
 {
 	iconv_t conv_gbk_2_utf = iconv_open("UTF-8", "GBK");
-	int code = encoding_convert(strSrc, strDst, strRes, conv_gbk_2_utf);
+	int code = EncodingConvert(input, output, convert_result, conv_gbk_2_utf);
 	return code;
 }
 
-int Utilities::UTF2GBK(std::string & strSrc, std::string & strDst, std::string & strRes)
+int Utilities::Utf8ToGbk(std::string & input, std::string & output, std::string & convert_result)
 {
 	iconv_t conv_utf_2_gbk = iconv_open("GBK", "UTF-8");
-	int code = encoding_convert(strSrc, strDst, strRes, conv_utf_2_gbk);
+	int code = EncodingConvert(input, output, convert_result, conv_utf_2_gbk);
 	return code;
 }
 
@@ -30,37 +64,40 @@ Utilities::Utilities()
 Utilities::~Utilities()
 {
 }
-
-int Utilities::encoding_convert(std::string & strSrc, std::string & strDst, std::string & strResult, iconv_t conv)
+//编码之间相互转换函数
+//convert_result：转换结果，用于打印错误信息
+//conv：iconv_open（）的返回值
+//return：0：成功，非零：失败
+int Utilities::EncodingConvert(std::string & input, std::string & output, std::string & convert_result, iconv_t conv)
 {
-	char strOutput[G_MAX_CONVERT_LEN];
-	memset(strOutput, 0, sizeof(strOutput));
-	//iconv_t conv_utf_2_gbk = iconv_open("GBK", "UTF-8");
-	size_t iSrcLen = strSrc.size();
-	size_t iDstLen = G_MAX_CONVERT_LEN;
-	if (iSrcLen > G_MAX_CONVERT_LEN)
-		iSrcLen = G_MAX_CONVERT_LEN;
+	char output_arr[kMaxConvertLen];
+	memset(output_arr, 0, sizeof(output_arr));
 
-	char *inBuf = const_cast<char *>(strSrc.c_str());
-	//*(inBuf+strSrc.size()) = 0;
-	char *outBuf = strOutput;
-	int iRet = iconv(conv, &inBuf, &iSrcLen, &outBuf, &iDstLen);
+	size_t input_len = input.size();
+	size_t output_len = kMaxConvertLen;
+	if (input_len > kMaxConvertLen)
+		input_len = kMaxConvertLen;
+
+	char *input_buf = const_cast<char *>(input.c_str());
+
+	char *output_buf = output_arr;
+	int iRet = iconv(conv, &input_buf, &input_len, &output_buf, &output_len);
 	if (-1 == iRet)
 	{
-		strResult = "<Err>, convert failed, str:";
-		strResult += strSrc;
-		strResult += ", strerr:";
-		strResult += strerror(errno);
+		convert_result = "<Err>, convert failed, str:";
+		convert_result += input;
+		convert_result += ", strerr:";
+		convert_result += strerror(errno);
 		return -1;
 	}
 	iRet = iconv_close(conv);
 	if (-1 == iRet)
 	{
-		strResult = "<Err>, iconv_close failed, strerr:";
-		strResult += strerror(errno);
+		convert_result = "<Err>, iconv_close failed, strerr:";
+		convert_result += strerror(errno);
 		return -2;
 
 	}
-	strDst = strOutput;
+	output = output_arr;
 	return 0;
 }

@@ -7,15 +7,33 @@
 class Utilities
 {
 public:
-	static int GBK2UTF(std::string & strSrc, std::string & strDst, std::string & strRes);
-	static int UTF2GBK(std::string & strSrc, std::string & strDst, std::string & strRes);
+	//返回本地时间，时间格式：
+	static std::string CurrentTimeString();
+	//以time_formate格式返回本地时间
+	static std::string CurrentTimeString(const char *time_formate);
+	static void LogInfo(const std::string & message);
+	static void LogWarning(const std::string & message);
+	static void LogError(const std::string & message);
+	//将gbk字符串转成utf8编码的字符串
+	//input：gbk编码字符串
+	//output：utf8编码字符串
+	//convert_result：转换结果，用于打印错误信息
+	//return：0：成功，非零：失败
+	static int GbkToUtf8(std::string & input, std::string & output, std::string & convert_result);
+	//将utf8编码字符串转成gbk编码的字符串
+	//input：utf8编码字符串
+	//output：gbk编码字符串
+	//convert_result：转换结果，用于打印错误信息
+	//return：0：成功，非零：失败
+	static int Utf8ToGbk(std::string & input, std::string & output, std::string & convert_result);
 	Utilities();
 	~Utilities();
 private:
-	static int encoding_convert(std::string &strSrc, std::string &strDst, std::string &strResult, iconv_t conv);
+
+	static int EncodingConvert(std::string & input, std::string & output, std::string & convert_result, iconv_t conv);
 };
 
-#endif // !1
+#endif // UTILITIESFUNCITON_UTILITIES_H_
 
 
 
